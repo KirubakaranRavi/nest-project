@@ -1,4 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+} from 'typeorm';
 
 @Entity('auth_tokens')
 export class AuthToken {
@@ -11,12 +16,14 @@ export class AuthToken {
   @Column({ unique: true })
   token: string;
 
-  @Column({ default: false })
-  is_expired: boolean;
-
   @CreateDateColumn()
   created_at: Date;
 
   @Column()
   expires_at: Date;
+
+  // No need to store is_expired, just compute it dynamically
+  get is_expired(): boolean {
+    return new Date() > this.expires_at;
+  }
 }

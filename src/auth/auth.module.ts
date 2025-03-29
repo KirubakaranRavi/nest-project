@@ -11,6 +11,7 @@ import { AuthToken } from './auth-token.entity';  // Import entity
 
 @Module({
   imports: [
+    // forwardRef(() => UsersModule),
     UsersModule,
     PassportModule,
     JwtModule.register({

@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { AuthTokenService } from './auth-token.service';
 import * as dayjs from 'dayjs';
@@ -15,10 +19,17 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
 
+    // Case 1: Email does not exist
+    if (!user) {
+      throw new BadRequestException('Invalid email or email not registered');
+    }
+
+    // Case 2: Email exists but password is incorrect
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) throw new UnauthorizedException('Invalid credentials');
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Incorrect password');
+    }
 
     return user;
   }
@@ -28,7 +39,11 @@ export class AuthService {
     const token = this.jwtService.sign({ email }, { expiresIn });
 
     // Save token in the database
-    await this.authTokenService.saveToken(email, token, dayjs().add(1, 'hour').toDate());
+    await this.authTokenService.saveToken(
+      email,
+      token,
+      dayjs().add(1, 'hour').toDate(),
+    );
 
     return token;
   }
@@ -37,12 +52,16 @@ export class AuthService {
     const user = await this.validateUser(email, password);
     const token = await this.generateToken(user.email);
 
-    return { access_token: token };
+    return { message: 'Login successful', access_token: token };
   }
 
   async logout(email: string) {
     const user = await this.usersService.findByEmail(email);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+
+    // Case 3: Invalid email when logging out
+    if (!user) {
+      throw new BadRequestException('Invalid email or email not found');
+    }
 
     // Invalidate the token in the database
     await this.authTokenService.invalidateTokens(email);

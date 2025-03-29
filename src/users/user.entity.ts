@@ -1,4 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -11,6 +16,27 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ default: 'viewer' }) // Default role
-  role: 'admin' | 'editor' | 'viewer';
+  @Column({ nullable: true })
+  firstName: string;
+
+  @Column({ nullable: true })
+  lastName: string;
+
+  @Column()
+  role: string; // Role should be explicitly assigned, no default
+
+  @Column({ default: true })
+  is_active: boolean; // Active status
+
+  @Column({ default: false })
+  is_deleted: boolean; // Soft delete
+
+  @Column({ default: false })
+  is_super: boolean; // Super admin flag
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @CreateDateColumn()
+  updated_at: Date;
 }
