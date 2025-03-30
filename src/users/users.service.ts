@@ -61,10 +61,66 @@ export class UsersService {
   }
 
   async findById(id: number) {
-    const userId = await this.usersRepository.findOne({ where: { id } });
+    const userId = await this.usersRepository.findOne({
+      where: { id, is_deleted: false },
+    });
     if (!userId) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
     return userId;
+  }
+
+  async updateUserData(
+    id: number,
+    email?: string,
+    password?: string,
+    role?: string,
+    firstName?: string,
+    lastName?: string,
+    is_super?: boolean,
+    is_active?: boolean,
+  ) {
+    const user = await this.usersRepository.findOne({
+      where: { id, is_deleted: false },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    // ✅ Update only provided fields
+    if (email) user.email = email;
+    if (password) user.password = await bcrypt.hash(password, 12);
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (typeof is_super === 'boolean') user.is_super = is_super;
+    if (typeof is_active === 'boolean') user.is_active = is_active;
+
+    // ✅ Role handling
+    if (is_super) {
+      user.role = 'admin'; // Enforce admin role if user is super admin
+    } else if (role) {
+      // ✅ Fetch valid roles only if role is being updated
+      const validRoles = await this.roleRepository.find();
+      const validRoleNames = validRoles.map((r) => r.name);
+
+      if (!validRoleNames.includes(role)) {
+        throw new BadRequestException(
+          `Invalid role: ${role}. Choose a valid role.`,
+        );
+      }
+      user.role = role;
+    }
+
+    return this.usersRepository.save(user);
+  }
+
+  async deleteUserData(id: number) {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    user.is_deleted = true; // Soft delete
+    return this.usersRepository.save(user);
   }
 }

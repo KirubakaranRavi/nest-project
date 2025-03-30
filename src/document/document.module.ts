@@ -3,9 +3,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DocumentService } from './document.service';
 import { DocumentController } from './document.controller';
 import { Document } from './document.entity';
+import { UsersModule } from 'src/users/users.module';
+import { AuthModule } from 'src/auth/auth.module';
+import { RolesModule } from 'src/roles/roles.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Document])], // ✅ Register the Document entity here
+  imports: [
+    TypeOrmModule.forFeature([Document]),
+    UsersModule,
+    AuthModule,
+    RolesModule,
+  ], // ✅ Register the Document entity here
   providers: [DocumentService],
   controllers: [DocumentController],
   exports: [DocumentService],

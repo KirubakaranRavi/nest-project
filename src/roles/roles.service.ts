@@ -85,4 +85,14 @@ export class RolesService {
       is_deleted: true, // Mark the role as deleted
     });
   }
+
+  async findByName(role: string) {
+    const roleData = await this.rolesRepository.findOne({
+      where: { name: role },
+    });
+    if (!roleData) {
+      throw new NotFoundException(`Role with name "${role}" not found.`); // Handle not found
+    }
+    return roleData;
+  }
 }

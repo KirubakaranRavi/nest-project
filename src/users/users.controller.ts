@@ -9,6 +9,8 @@ import {
   UsePipes,
   ValidationPipe,
   Param,
+  Delete,
+  Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -51,5 +53,35 @@ export class UsersController {
       throw new BadRequestException('User not found');
     }
     return user;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put(':id')
+  async updateUser(@Param('id') id: string, @Body() body: RegisterUserDto) {
+    const user = await this.usersService.findById(Number(id));
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    return this.usersService.updateUserData(
+      Number(id),
+      body.email,
+      body.password,
+      body.role ?? user.role, // ✅ Keep existing role if not provided
+      body.firstName ?? user.firstName,
+      body.lastName ?? user.lastName,
+      body.is_super ?? user.is_super,
+      body.is_active ?? user.is_active,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async deleteUser(@Param('id') id: string) {
+    const user = await this.usersService.findById(Number(id));
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    return this.usersService.deleteUserData(Number(id));
   }
 }

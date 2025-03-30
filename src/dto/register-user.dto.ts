@@ -34,4 +34,8 @@ export class RegisterUserDto {
   @IsOptional()
   @IsBoolean()
   is_super?: boolean; // ✅ If true, role validation is skipped
+
+  @IsOptional()
+  @IsBoolean()
+  is_active?: boolean; // ✅ Optional field for user status
 }
