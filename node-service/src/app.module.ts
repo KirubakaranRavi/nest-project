@@ -8,6 +8,7 @@ import { DocumentService } from './document/document.service';
 import { DocumentController } from './document/document.controller';
 import { DocumentModule } from './document/document.module';
 import { Document } from './document/document.entity';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { Document } from './document/document.entity';
     AuthModule,
     RolesModule,
     DocumentModule,
+    HttpModule,
   ],
 })
 export class AppModule {}
